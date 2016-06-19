@@ -27,11 +27,10 @@ _RE_TOTAL_ = re.compile(r'<openSearch:totalResults>([0-9]+)</openSearch:totalRes
 _RE_INDEX_ = re.compile(r'<openSearch:startIndex>([0-9]+)</openSearch:startIndex>')
 
 # OpenSearch WebAPI
-#REQ_FORMAT = 'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE+'&cnt='+_SCOUNT+'&idx=__INDEX__'
-#REQ2_FORMAT = 'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=7&cnt='+_SCOUNT+'&idx=__INDEX__'
-REQ_FORMATS = ['http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE_CHILD+'&cnt='+_SCOUNT+'&idx=__INDEX__',
-               'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE_BOOK+'&cnt='+_SCOUNT+'&idx=__INDEX__',
-               'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=7&cnt='+_SCOUNT+'&idx=__INDEX__' ]
+REQ_FORMATS = ['http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=913&cnt='+_SCOUNT+'&idx=__INDEX__', #日本文学 小説・物語
+               'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=726&cnt='+_SCOUNT+'&idx=__INDEX__', #絵画 漫画・挿絵・童画
+               'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=930&cnt='+_SCOUNT+'&idx=__INDEX__', #英米文学
+               'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=911&cnt='+_SCOUNT+'&idx=__INDEX__' ]#日本文学 詩歌
 
 # XML保存ディレクトリの作成
 _SAVE_DIR = 'OpenSearch_XML'
