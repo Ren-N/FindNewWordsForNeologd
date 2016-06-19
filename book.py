@@ -19,7 +19,7 @@ _MEDIATYPE_DIGITAL = '6' #デジタル資料
 _MEDIATYPE_OTHER   = '7' #その他
 _MEDIATYPE_DISAB   = '8' #障がい者向け資料
 _MEDIATYPE_LEGI    = '9' #立法情報
-_MEDIATYPE         = _MEDIATYPE_CHILD
+
 # 一度に取得する検索結果数(最大500件)
 _SCOUNT = '500'
 # 検索結果の件数情報取得のための正規表現
@@ -29,7 +29,8 @@ _RE_INDEX_ = re.compile(r'<openSearch:startIndex>([0-9]+)</openSearch:startIndex
 # OpenSearch WebAPI
 #REQ_FORMAT = 'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE+'&cnt='+_SCOUNT+'&idx=__INDEX__'
 #REQ2_FORMAT = 'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=7&cnt='+_SCOUNT+'&idx=__INDEX__'
-REQ_FORMATS = ['http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE+'&cnt='+_SCOUNT+'&idx=__INDEX__',
+REQ_FORMATS = ['http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE_CHILD+'&cnt='+_SCOUNT+'&idx=__INDEX__',
+               'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE_BOOK+'&cnt='+_SCOUNT+'&idx=__INDEX__',
                'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=7&cnt='+_SCOUNT+'&idx=__INDEX__' ]
 
 # XML保存ディレクトリの作成
@@ -84,7 +85,7 @@ def requestOpenSearchBackward():
 
     # リクエスト発行
     for i,req in enumerate(REQ_FORMATS):
-        time.sleep(5)
+        time.sleep(1)
         url = req.replace('__FROM__',BDateInfos['from']).replace('__UNTIL__',BDateInfos['until']).replace('__INDEX__', str(1+(int(b_idx)-1)*int(_SCOUNT)) )
         response = urllib2.urlopen(url)
         xml = unescape( response.read().decode('utf-8') ) #&ampなどのエスケープ文字をなおす
@@ -116,7 +117,7 @@ def requestOpenSearchBackward():
 if __name__ == '__main__':
     while True:
         requestOpenSearchBackward()
-        time.sleep(10)
+        time.sleep(5)
 # [.date_before] -------------------------------
 # contents is 'date=2016-6,index=1'
 # date : 取得開始日

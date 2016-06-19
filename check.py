@@ -94,12 +94,16 @@ acc={} #ファイルを頻繁に開くと無駄なのである程度ためる
 acc_max = 500
 # _data is list.      e.g. ['title', 'kana']
 # _file is filename   i.e. _CSV_TITLE or _CSV_META
-def insertIntoCsvFile(_data,_file):
-    if _file not in acc:
-        acc[_file] = []
-    if len(acc[_file]) < acc_max:
+# onAcc is bool.      ためるかどうか
+def insertIntoCsvFile(_data,_file,onAcc):
+    if onAcc:
+        if _file not in acc:
+            acc[_file] = []
+        if len(acc[_file]) < acc_max:
+            acc[_file].append(toCsvFormat(_data))
+            return
+    else:
         acc[_file].append(toCsvFormat(_data))
-        return
     data_acc = ''.join(acc[_file]) #acc取り出し
     acc[_file] = []                #accリセット
     # csvファイルに追記
@@ -128,22 +132,32 @@ if __name__ == '__main__':
     file_nums = len(json_files)
     print("json files:"+str(file_nums))
     cnt = 0
+    allready = 0
     for jfile in json_files:
         cnt += 1
         f = open(os.path.join(_JSON_DIR,jfile), 'r')
         b_json = json.load(f)
         f.close()
+        # 一度読み込んだJSONファイルを除外
+        if os.path.exists(os.path.join(_JSON_DONE_DIR,jfile)):
+            os.remove(os.path.join(_JSON_DONE_DIR,jfile))
+        shutil.move(os.path.join(_JSON_DIR,jfile), _JSON_DONE_DIR)
         # cnt_max回はためる ... 同じタイトル(漫画など)重複分の処理省略，jsonのサイズが小さい場合のDB操作のロスを減らす
         books_dic.update(b_json)
         print(jfile)
-        print(len(b_json))
-        print(len(books_dic))
+        print('book:'+str(len(b_json)))
+        print('acc:'+str(len(books_dic)))
         if len(books_dic) < dic_max  and  cnt != file_nums: #最後の時はスキップしない
             continue
+        print('DONE -------------')
+        books_num = len(books_dic)
+        i = 0
         for title, info in books_dic.items():
+            i += 1
             #国立国会図書館サーチからの結果で，すでに登録していないかDBでチェック
             if not insertBookIntoDB(title,info):
                 # title は既出
+                allready += 1
                 continue
             # title は初出
             # Neologdに登録されているかでチェック
@@ -155,7 +169,10 @@ if __name__ == '__main__':
                 #未登録 ... kanaと組にする
                 _file = _CSV_TITLE
                 _data = [title, info['kana']]
-            insertIntoCsvFile(_data, _file)
+            if i == books_num:
+                onAcc = False
+            else:
+                onAcc = True
+            insertIntoCsvFile(_data, _file, onAcc)
         books_dic = {}
-        # 一度読み込んだJSONファイルを除外
-        shutil.move(os.path.join(_JSON_DIR,jfile), _JSON_DONE_DIR)
+    print('重複回数:'+str(allready))

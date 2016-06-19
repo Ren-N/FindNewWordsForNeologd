@@ -14,7 +14,7 @@ _RE_AUTHOR   = re.compile(r'<author>(.+?)</author>',re.DOTALL) #authorは末尾�
 _RE_CREATOR  = re.compile(r'<dc:creator>(.+?)</dc:creator>',re.DOTALL)
 
 _XML_DIR      = 'OpenSearch_XML'
-_XML_DONE_DIR = 'OpenSearch_XML_old' #一応使い終わったものもとっておく．
+_XML_DONE_DIR = 'OpenSearch_Done_XML' #一応使い終わったものもとっておく．
 _JSON_DIR     = 'OpenSearch_JSON'
 _IGNORE_FILE  = ['.date_before']
 if not os.path.isdir(_JSON_DIR):
@@ -55,10 +55,11 @@ def xmlToJson():
         f.close()
         # JSON形式で保存
         b_json = convtJson(cts)
-        if len(b_json) == 0:
-            continue
-        f=codecs.open(os.path.join(_JSON_DIR,xml.replace('.xml','.json')),'w','utf-8')
-        json.dump(b_json,f, indent=2, ensure_ascii=False)
-        f.close()
+        if len(b_json) != 0:
+            f=codecs.open(os.path.join(_JSON_DIR,xml.replace('.xml','.json')),'w','utf-8')
+            json.dump(b_json,f, indent=2, ensure_ascii=False)
+            f.close()
         # 一度読み込んだXMLファイルを除外
+        if os.path.exists(os.path.join(_XML_DONE_DIR,xml)):
+            os.remove(os.path.join(_XML_DONE_DIR,xml))
         shutil.move(os.path.join(_XML_DIR,xml), _XML_DONE_DIR)
