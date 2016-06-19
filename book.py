@@ -7,6 +7,7 @@ import datetime
 import re
 import os
 import time
+from xml.sax.saxutils import unescape
 
 # OpenSearch mediatype option
 _MEDIATYPE_BOOK    = '1' #本
@@ -79,9 +80,9 @@ def requestOpenSearchBackward():
     BDateInfos = getRequestBDateInfos(b_date)
 
     # リクエスト発行
-    url = REQ_FORMAT.replace('__FROM__',BDateInfos['from']).replace('__UNTIL__',BDateInfos['until']).replace('__INDEX__',b_idx)
+    url = REQ_FORMAT.replace('__FROM__',BDateInfos['from']).replace('__UNTIL__',BDateInfos['until']).replace('__INDEX__', str(1+(int(b_idx)-1)*int(_SCOUNT)) )
     response = urllib2.urlopen(url)
-    xml = response.read().decode('utf-8')
+    xml = unescape( response.read().decode('utf-8') ) #&ampなどのエスケープ文字をなおす
 
     # 結果を保存
     result_file = b_date+'_'+b_idx+'.xml'
@@ -110,7 +111,7 @@ def requestOpenSearchBackward():
 if __name__ == '__main__':
     while True:
         requestOpenSearchBackward()
-        time.sleep(60)
+        time.sleep(10)
 # [.date_before] -------------------------------
 # contents is 'date=2016-6,index=1'
 # date : 取得開始日

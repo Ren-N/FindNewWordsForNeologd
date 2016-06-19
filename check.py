@@ -3,6 +3,7 @@ import os
 import MeCab
 import json
 import xml2json
+import shutil
 # OpenSearchでは巻数がtitleと別なので，titleを固有名詞として捉える．
 
 _DB_NAME = 'books.db'
@@ -20,8 +21,8 @@ def initDB():
         isExistDB = True
     connection = sqlite3.connect(_DB_NAME, isolation_level=None)
     csr = connection.cursor()
-    if isExistDB:
-        sql = 'CREATE TABLE books(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT UNIQUE, kana TEXT, category TEXT, author TEXT)'
+    if not isExistDB:
+        sql = """CREATE TABLE books(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT UNIQUE, kana TEXT, category TEXT, author TEXT)"""
         csr.execute(sql)
     csr.close()
 
@@ -34,11 +35,11 @@ def hasBookInDB(title):
         return True
     connection = sqlite3.connect(_DB_NAME, isolation_level=None)
     csr = connection.cursor()
-    sql = 'SELECT id, title FROM books WHERE title = "{0}";'.format(title)
+    sql = """SELECT id, title FROM books WHERE title = "{0}";""".format(title.replace('"','""'))
     csr.execute(sql)
     b = csr.fetchone()
     csr.close()
-    if len(b) > 0:
+    if b and len(b) > 0:
         # found
         if len(cacheSet) > _CACHE_SIZE:
             cacheSet.pop()
@@ -55,11 +56,13 @@ def insertBookIntoDB(title,info):
         return False
     connection = sqlite3.connect(_DB_NAME, isolation_level=None)
     csr = connection.cursor()
-    sql = 'SELECT id, title FROM books WHERE title = "{0}";'.format(title)
+    sql = """SELECT id, title FROM books WHERE title = "{0}";""".format(title.replace('"','""'))
+    # print(title)
     csr.execute(sql)
     b = csr.fetchone()
-    if len(b) > 0:
+    if b and len(b) > 0:
         # found
+        # print(title)
         done = False
         # Cacheに追加
         if len(cacheSet) > _CACHE_SIZE:
@@ -69,7 +72,7 @@ def insertBookIntoDB(title,info):
         # not found
         done = True
         # DBに登録
-        sql = 'INSERT INTO books(title,kana,author,category) VALUES("{0}","{1}","{2}","{3}")'.format(title,info['kana'],info['author'],info['category'])
+        sql = """INSERT INTO books(title,kana,author,category) VALUES("{0}","{1}","{2}","{3}")""".format(title.replace('"','""'),info['kana'].replace('"','""'),info['author'].replace('"','""'),info['category'].replace('"','""'))
         csr.execute(sql)
     csr.close()
     return done
@@ -109,7 +112,8 @@ def insertIntoCsvFile(_data,_file):
 def toCsvFormat(data_lst):
     ds = []
     for d in data_lst:
-        ds.append('"{0}"'.format(d))
+        # 文字列中に,があるため""で囲む．文字列中の"は「""」でエスケープ．
+        ds.append('"{0}"'.format(d.replace('"','""')))
     return ','.join(ds) + '\n'
 
 if __name__ == '__main__':
@@ -122,6 +126,7 @@ if __name__ == '__main__':
     dic_max = 1500
     json_files = os.listdir(_JSON_DIR)
     file_nums = len(json_files)
+    print("json files:"+str(file_nums))
     cnt = 0
     for jfile in json_files:
         cnt += 1
@@ -130,6 +135,9 @@ if __name__ == '__main__':
         f.close()
         # cnt_max回はためる ... 同じタイトル(漫画など)重複分の処理省略，jsonのサイズが小さい場合のDB操作のロスを減らす
         books_dic.update(b_json)
+        print(jfile)
+        print(len(b_json))
+        print(len(books_dic))
         if len(books_dic) < dic_max  and  cnt != file_nums: #最後の時はスキップしない
             continue
         for title, info in books_dic.items():

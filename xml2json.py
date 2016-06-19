@@ -3,6 +3,7 @@ import shutil
 import re
 import json
 import codecs
+from xml.sax.saxutils import unescape
 # 月ごとにファイルを作るのは無駄だが，随時新しいのが作られる事を想定して，統合・重複削除はDBでやる.
 
 _RE_BOOK     = re.compile(r'<item>(.+?)</item>',re.DOTALL)
@@ -50,7 +51,7 @@ def xmlToJson():
         if xml in _IGNORE_FILE:
             continue
         f = open(os.path.join(_XML_DIR,xml), 'r')
-        cts = f.read()
+        cts = unescape(f.read())
         f.close()
         # JSON形式で保存
         b_json = convtJson(cts)
