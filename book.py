@@ -27,7 +27,10 @@ _RE_TOTAL_ = re.compile(r'<openSearch:totalResults>([0-9]+)</openSearch:totalRes
 _RE_INDEX_ = re.compile(r'<openSearch:startIndex>([0-9]+)</openSearch:startIndex>')
 
 # OpenSearch WebAPI
-REQ_FORMAT = 'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE+'&cnt='+_SCOUNT+'&idx=__INDEX__'
+#REQ_FORMAT = 'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE+'&cnt='+_SCOUNT+'&idx=__INDEX__'
+#REQ2_FORMAT = 'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=7&cnt='+_SCOUNT+'&idx=__INDEX__'
+REQ_FORMATS = ['http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&mediatype='+_MEDIATYPE+'&cnt='+_SCOUNT+'&idx=__INDEX__',
+               'http://iss.ndl.go.jp/api/opensearch?from=__FROM__&until=__UNTIL__&ndc=7&cnt='+_SCOUNT+'&idx=__INDEX__' ]
 
 # XML保存ディレクトリの作成
 _SAVE_DIR = 'OpenSearch_XML'
@@ -80,15 +83,17 @@ def requestOpenSearchBackward():
     BDateInfos = getRequestBDateInfos(b_date)
 
     # リクエスト発行
-    url = REQ_FORMAT.replace('__FROM__',BDateInfos['from']).replace('__UNTIL__',BDateInfos['until']).replace('__INDEX__', str(1+(int(b_idx)-1)*int(_SCOUNT)) )
-    response = urllib2.urlopen(url)
-    xml = unescape( response.read().decode('utf-8') ) #&ampなどのエスケープ文字をなおす
+    for i,req in enumerate(REQ_FORMATS):
+        time.sleep(5)
+        url = req.replace('__FROM__',BDateInfos['from']).replace('__UNTIL__',BDateInfos['until']).replace('__INDEX__', str(1+(int(b_idx)-1)*int(_SCOUNT)) )
+        response = urllib2.urlopen(url)
+        xml = unescape( response.read().decode('utf-8') ) #&ampなどのエスケープ文字をなおす
 
-    # 結果を保存
-    result_file = b_date+'_'+b_idx+'.xml'
-    f = open(_SAVE_DIR+'/'+result_file,'w')
-    f.write(xml)
-    f.close()
+        # 結果を保存
+        result_file = b_date+'_'+b_idx+'_req'+str(i)+'.xml'
+        f = open(_SAVE_DIR+'/'+result_file,'w')
+        f.write(xml)
+        f.close()
 
     # 検索結果がまだ残っているか
     total = _RE_TOTAL_.search(xml).group(1)
