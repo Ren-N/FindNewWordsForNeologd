@@ -102,14 +102,25 @@ def insertIntoCsvFile(_data,_file,onAcc):
         if len(acc[_file]) < acc_max:
             acc[_file].append(toCsvFormat(_data))
             return
+        data_acc = ''.join(acc[_file]) #acc取り出し
+        acc[_file] = []
+        # csvファイルに追記
+        f = open(_file, 'a')
+        f.write(data_acc)
+        f.close()
+        print('write:'+_file)
     else:
+        #最後はACC全部書き込む
         acc[_file].append(toCsvFormat(_data))
-    data_acc = ''.join(acc[_file]) #acc取り出し
-    acc[_file] = []                #accリセット
-    # csvファイルに追記
-    f = open(_file, 'a')
-    f.write(data_acc)
-    f.close()
+        for _f, _acc in acc.items():
+            data_acc = ''.join(_acc) #acc取り出し
+            # csvファイルに追記
+            f = open(_f, 'a')
+            f.write(data_acc)
+            f.close()
+            print('write:'+_f)
+        acc[_CSV_META] = [] #accリセット
+        acc[_CSV_TITLE]= []
 
 # data_lst is list.  e.g. ['title','kana']
 # return '"title","kana"\n'
@@ -133,6 +144,8 @@ if __name__ == '__main__':
     print("json files:"+str(file_nums))
     cnt = 0
     allready = 0
+    meta_nums = 0
+    word_nums = 0
     for jfile in json_files:
         cnt += 1
         f = open(os.path.join(_JSON_DIR,jfile), 'r')
@@ -165,10 +178,12 @@ if __name__ == '__main__':
                 #登録済 ... メタ情報と組にする
                 _file = _CSV_META
                 _data = [title, info['author'], info['category']]
+                meta_nums += 1
             else:
                 #未登録 ... kanaと組にする
                 _file = _CSV_TITLE
                 _data = [title, info['kana']]
+                word_nums += 1
             if i == books_num:
                 onAcc = False
             else:
@@ -176,3 +191,5 @@ if __name__ == '__main__':
             insertIntoCsvFile(_data, _file, onAcc)
         books_dic = {}
     print('重複回数:'+str(allready))
+    print('新語:'+str(word_nums))
+    print('メタ:'+str(meta_nums))
