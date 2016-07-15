@@ -45,8 +45,11 @@ $ python check.py
 
 ### 補助スクリプト
  - xml2json.py
+
     XMLをJson形式に変換する．check.pyで使用している．
+    
  - checkProcess.sh
+
 	startGetBookInfo.shで起動したプロセスが実行中か確認する．
 
 
