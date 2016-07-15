@@ -16,22 +16,31 @@
 ```
 $ python book.py
 ```
-	月ごとの書籍情報のXMLを過去に遡って取得する．.data_beforeファイルにいつまで遡って取得したか記録しているため，続きから取得可能である．
+
+月ごとの書籍情報のXMLを過去に遡って取得する．.data_beforeファイルにいつまで遡って取得したか記録しているため，続きから取得可能である．
 
 ```
 $ python check.py
 ```
- 	書籍情報のXMLがあればそのファイルに含まれる未登録の単語(書籍名)と読み仮名のペアをnew.csvに保存する．
+
+書籍情報のXMLがあればそのファイルに含まれる未登録の単語(書籍名)と読み仮名のペアをnew.csvに保存する．
 	
 ## ファイル構成
 ### 実行用スクリプト
  - book.py
+
  	OpenSerach_XMLディレクトリを作成し，国立国会図書館サーチから取得する書籍情報を持つXMLを保存する．
+ 
  - check.py
+
     OpenSerach_XMLディレクトリXMLファイルがあればXMLから未登録単語を捜し，new.csvに追記保存する．
+    
  - startGetBookInfo.sh
+
     バックグラウンドでbook.pyのプロセスを起動する．
+    
  - endGetBookInfo.sh
+
 	startGetBookInfo.shで開始したプロセスを終了させる．
 
 ### 補助スクリプト
